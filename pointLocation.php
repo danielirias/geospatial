@@ -80,9 +80,9 @@ class pointLocation
 		return array("x" => trim($coordinates[0]), "y" => trim($coordinates[1]));
 	}
 
-	// Función para calcular la distancia utilizando la fórmula Haversine
+	// Función para calcular la distancia utilizando la fórmula Haversine.
 	// La fórmula de Haversine es una fórmula trigonométrica utilizada para calcular la distancia entre dos puntos en la superficie de una esfera.
-	// Esta fórmula se utiliza comúnmente para calcular la distancia entre dos ubicaciones geográficas especificadas por sus latitudes y longitudes en un globo terráqueo, como la Tierra.
+	// Esta fórmula se utiliza comúnmente para calcular la distancia entre dos ubicaciones geográficas, especificadas por sus latitudes y longitudes, en la superficie terrestre.
 	// El resultado de la fórmula es la distancia más corta entre los dos puntos a lo largo de la superficie de la esfera, y se expresa típicamente en unidades de distancia, como kilómetros o millas.
 
 	// La fórmula de Haversine toma en cuenta la curvatura de la Tierra y es especialmente útil para calcular distancias en distancias relativamente cortas,

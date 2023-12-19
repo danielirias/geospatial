@@ -2,15 +2,15 @@
 
 <?php
 
-	// Ubicación de la tienda dentro de Tegucigalpa (Mall Las Cascadas)
-	$storeLocation = ["lat"=>"14.0773787107216", "lon"=>"-87.20083773247653"];
+	// Ubicación del orígen dentro de Tegucigalpa (Mall Las Cascadas)
+	$originLocation = ["lat"=>"14.0773787107216", "lon"=>"-87.20083773247653"];
 
-	// Coordenadas del cliente:
-	$customerCordinates = ["lat"=>"14.094742", "lon"=>"-87.183208"]; //Dentro de Tegucigalpa
-	//$customerCordinates = ["lat"=>"14.118717", "lon"=>"-87.112196"]; //Fuera de Tegucigalpa
+	// Coordenadas del destino:
+	$destinationCordinates = ["lat"=>"14.094742", "lon"=>"-87.183208"]; //Dentro de Tegucigalpa
+	//$destinationCordinates = ["lat"=>"14.118717", "lon"=>"-87.112196"]; //Fuera de Tegucigalpa
 
-	//La ubicación donde se encuentra el cliente:
-	$customerLocation = $customerCordinates["lat"].', '.$customerCordinates["lon"];
+	//La ubicación donde se encuentra el destino:
+	$destinationLocation = $destinationCordinates["lat"].', '.$destinationCordinates["lon"];
 
 
 	// -------------------------------------------------------------------------------------------------
@@ -55,26 +55,26 @@
 		}
 
 
-		// Compruebo si la ubicación del cliente está dentro o fuera de la malla de operación descrita.
+		// Compruebo si la ubicación del destino está dentro o fuera de la malla de operación descrita.
 		require_once ("pointLocation.php");
 		$pointLocation = new pointLocation();
 
-		if ($pointLocation->pointInPolygon($customerLocation, $polygonPoints) == "inside")
+		if ($pointLocation->pointInPolygon($destinationLocation, $polygonPoints) == "inside")
 		{
 			// ESTÁ DENTRO DE LA MALLA
-			$message = "** El cliente está ADENTRO de la malla **";
+			$message = "** El destino está ADENTRO de la malla **";
 		}
 
-		if ($pointLocation->pointInPolygon($customerLocation, $polygonPoints) == "outside")
+		if ($pointLocation->pointInPolygon($destinationLocation, $polygonPoints) == "outside")
 		{
 			// ESTÁ FUERA DE LA MALLA
-			$message = "** El cliente está AFUERA de la malla **";
+			$message = "** El destino está AFUERA de la malla **";
 		}
 
-		if ($pointLocation->pointInPolygon($customerLocation, $polygonPoints) == "vertex")
+		if ($pointLocation->pointInPolygon($destinationLocation, $polygonPoints) == "vertex")
 		{
 			// ESTÁ EXACTAMENTE EN UN VÉRTICE
-			$message = "** El cliente está en un VÉRTICE de la malla **";
+			$message = "** El destino está en un VÉRTICE de la malla **";
 		}
 
 		echo $message;
@@ -82,16 +82,16 @@
 
 
 	// -------------------------------------------------------------------------------------------------
-	// 2. OBTENGO LA DISTANCIA ENTRE LOS DOS PUNTOS: TIENDA Y CLIENTE
+	// 2. OBTENGO LA DISTANCIA ENTRE LOS DOS PUNTOS: ORÍGEN Y DESTINO
 
 	// Para ello recurro a la API de Google Maps. Es necesario obtener una clave API para poder visualizar el mapa.
 	// La distancia también puede determinarse a través de la fórmula de Haversine y la función incluida en la clase pointLocation,
 	// pero esta no ofrece un cálculo de tiempo, como sí lo hace la API de Google.
 	$apiKey = "AIzaSyB1n587x4IGX5JoxqAwiQbVI65mN_yIfcI";
 
-	//Origins: Representa la ubucacion de la tienda
-	//Destinations: Representa la ubicación DESTINO del cliente
-	$urlMatrix = "https://maps.googleapis.com/maps/api/distancematrix/json?key=".$apiKey."&units=metric&origins=".$storeLocation["lat"].",".$storeLocation["lon"]."&destinations=".$customerCordinates["lat"].",".$customerCordinates["lon"]."&mode=driving";
+	//Origins: Representa la ubucacion del ORIGEN
+	//Destinations: Representa la ubicación DESTINO
+	$urlMatrix = "https://maps.googleapis.com/maps/api/distancematrix/json?key=".$apiKey."&units=metric&origins=".$originLocation["lat"].",".$originLocation["lon"]."&destinations=".$destinationCordinates["lat"].",".$destinationCordinates["lon"]."&mode=driving";
 	//echo $urlMatrix; echo '<br>';
 
 	$ch = curl_init();
@@ -108,17 +108,17 @@
 	$distance = $response_a['rows'][0]['elements'][0]['distance']['value'];
 	$time = $response_a['rows'][0]['elements'][0]['duration']['value'];
 
-	$storeAddress = $response_a['origin_addresses'][0];
-	$customerAddress = $response_a['destination_addresses'][0];
+	$originAddress = $response_a['origin_addresses'][0];
+	$destinationAddress = $response_a['destination_addresses'][0];
 
 	echo '<h3>Cálculo de distancia y tiempo usando el sistema métrico internacional (metro, segundo)</h3>';
-	echo 'Distancia entre la tienda y el cliente (metros): '. number_format(trim($distance), 0);
+	echo 'Distancia entre el orígen y el destino (metros): '. number_format(trim($distance), 0);
 	echo '<br>';
-	echo 'Duración del viaje hacia el cliente (segundos): '. number_format(trim($time), 0);
+	echo 'Duración del viaje hacia el destino (segundos): '. number_format(trim($time), 0);
 	echo '<br>';
-	echo 'Dirección de la tienda: '.$storeAddress;
+	echo 'Dirección del orígen: '.$originAddress;
 	echo '<br>';
-	echo 'Dirección del cliente: '.$customerAddress;
+	echo 'Dirección del destino: '.$destinationAddress;
 	echo '<br>';
 
 
@@ -151,7 +151,7 @@
 	foreach ($locations as $location)
 	{
 		//Obtengo la distancia entre los dos puntos
-		$distance = $pointLocation->haversineDistance($location,  $storeLocation);
+		$distance = $pointLocation->haversineDistance($location,  $originLocation);
 
 		if ($distance <= $radiusDistance)
 		{
@@ -173,31 +173,31 @@
 	<script>
 		function initMap()
 		{
-			//Las coordenadas del cliente
-			const customerLatLon = { lat: <?php echo $customerCordinates["lat"]; ?>, lng: <?php echo $customerCordinates["lon"]; ?>};
+			//Las coordenadas del destino
+			const destinationLatLon = { lat: <?php echo $destinationCordinates["lat"]; ?>, lng: <?php echo $destinationCordinates["lon"]; ?>};
 
-			// Creo el mapa y lo centro en la ubicación del cliente
+			// Creo el mapa y lo centro en la ubicación del destino
 			var map = new google.maps.Map(document.getElementById("mapa"), {
 				zoom: 11,
-				center: customerLatLon,
+				center: destinationLatLon,
 				mapTypeId: "roadmap"
 			});
 
-			// El marcador de la ubicación del cliente
+			// El marcador de la ubicación del destino
 			new google.maps.Marker({
-				position: customerLatLon,
+				position: destinationLatLon,
 				map,
 				label: "B",
-				title: "Cliente"
+				title: "DESTINO"
 			});
 
-			// El marcador de la ubicación de nuestra tienda
-			const storeLocation = { lat: <?php echo $storeLocation["lat"]; ?>, lng: <?php echo $storeLocation["lon"]; ?>};
+			// El marcador de la ubicación de nuestro orígen
+			const originLatLon = { lat: <?php echo $originLocation["lat"]; ?>, lng: <?php echo $originLocation["lon"]; ?>};
 			new google.maps.Marker({
-				position: storeLocation,
+				position: originLatLon,
 				map,
 				label: "A",
-				title: "Tienda"
+				title: "ORÍGEN"
 			});
 
 			// Establezco las coordenadas de cada punto del polígono.
