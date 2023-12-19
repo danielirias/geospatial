@@ -62,13 +62,13 @@
 		if ($pointLocation->pointInPolygon($destinationLocation, $polygonPoints) == "inside")
 		{
 			// ESTÁ DENTRO DE LA MALLA
-			$message = "** El destino está ADENTRO de la malla **";
+			$message = "** El destino está DENTRO de la malla **";
 		}
 
 		if ($pointLocation->pointInPolygon($destinationLocation, $polygonPoints) == "outside")
 		{
 			// ESTÁ FUERA DE LA MALLA
-			$message = "** El destino está AFUERA de la malla **";
+			$message = "** El destino está FUERA de la malla **";
 		}
 
 		if ($pointLocation->pointInPolygon($destinationLocation, $polygonPoints) == "vertex")
@@ -170,55 +170,63 @@
 	<!-- Dibujo el mapa con la zona de cobertura -->
 	<div id="mapa" style="height: 400px; width: 100%; margin-top: 20px;"></div>
 
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<?php echo $apiKey; ?>"></script>
+
 	<script>
-		function initMap()
-		{
-			//Las coordenadas del destino
-			const destinationLatLon = { lat: <?php echo $destinationCordinates["lat"]; ?>, lng: <?php echo $destinationCordinates["lon"]; ?>};
+		//Las coordenadas del destino
+		const destinationLatLon = { lat: <?php echo $destinationCordinates["lat"]; ?>, lng: <?php echo $destinationCordinates["lon"]; ?>};
 
-			// Creo el mapa y lo centro en la ubicación del destino
-			var map = new google.maps.Map(document.getElementById("mapa"), {
-				zoom: 11,
-				center: destinationLatLon,
-				mapTypeId: "roadmap"
-			});
+		// Creo el mapa y lo centro en la ubicación del destino
+		var thisMap = new google.maps.Map(document.getElementById("mapa"), {
+			zoom: 12,
+			center: destinationLatLon,
+			mapTypeId: "roadmap"
+		});
 
-			// El marcador de la ubicación del destino
-			new google.maps.Marker({
-				position: destinationLatLon,
-				map,
-				label: "B",
-				title: "DESTINO"
-			});
+		// El marcador de la ubicación del destino
+		new google.maps.Marker({
+			position: destinationLatLon,
+			map: thisMap,
+			label: "B",
+			title: "DESTINO"
+		});
 
-			// El marcador de la ubicación de nuestro orígen
-			const originLatLon = { lat: <?php echo $originLocation["lat"]; ?>, lng: <?php echo $originLocation["lon"]; ?>};
-			new google.maps.Marker({
-				position: originLatLon,
-				map,
-				label: "A",
-				title: "ORÍGEN"
-			});
+		// El marcador de la ubicación de nuestro orígen
+		const originLatLon = { lat: <?php echo $originLocation["lat"]; ?>, lng: <?php echo $originLocation["lon"]; ?>};
+		new google.maps.Marker({
+			position: originLatLon,
+			map: thisMap,
+			label: "A",
+			title: "ORÍGEN"
+		});
 
-			// Establezco las coordenadas de cada punto del polígono.
-			var triangleCoords = [
-				<?php echo $strPolygon; ?>
-			];
+		// Establezco las coordenadas de cada punto del polígono.
+		var triangleCoords = [
+			<?php echo $strPolygon; ?>
+		];
 
-			// Construyo el polígono.
-			var Mallapoligono = new google.maps.Polygon({
-				paths: triangleCoords,
-				strokeColor: "#FF0000",
-				strokeOpacity: 0.8,
-				strokeWeight: 2,
-				fillColor: "#FF0000",
-				fillOpacity: 0.1
-			});
+		// Construyo el polígono.
+		var Mallapoligono = new google.maps.Polygon({
+			paths: triangleCoords,
+			strokeColor: "#FF0000",
+			strokeOpacity: 0.8,
+			strokeWeight: 2,
+			fillColor: "#FF0000",
+			fillOpacity: 0.1
+		});
 
-			Mallapoligono.setMap(map);
-		}
-	</script>
+		Mallapoligono.setMap(thisMap);
 
-	<script async defer
-		src="https://maps.googleapis.com/maps/api/js?callback=initMap">
+		// Crear un círculo alrededor del punto central
+		var coverageRadius = new google.maps.Circle({
+			strokeColor: '#FA9000',
+			strokeOpacity: 0.8,
+			strokeWeight: 2,
+			fillColor: '#FA9000',
+			fillOpacity: 0.2,
+			center: originLatLon,
+			radius: <?php echo $radiusDistance; ?> * 1000, // Radio en metros
+		});
+
+		coverageRadius.setMap(thisMap);
 	</script>
