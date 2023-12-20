@@ -87,7 +87,8 @@
 	// Para ello recurro a la API de Google Maps. Es necesario obtener una clave API para poder visualizar el mapa.
 	// La distancia también puede determinarse a través de la fórmula de Haversine y la función incluida en la clase pointLocation,
 	// pero esta no ofrece un cálculo de tiempo, como sí lo hace la API de Google.
-	$apiKey = "AIzaSyB1n587x4IGX5JoxqAwiQbVI65mN_yIfcI";
+
+	$apiKey = ""; //Aquí va tu clave de API de Google
 
 	//Origins: Representa la ubucacion del ORIGEN
 	//Destinations: Representa la ubicación DESTINO
